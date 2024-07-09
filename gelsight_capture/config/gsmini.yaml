@@ -1,0 +1,9 @@
+# Device Name
+device_name: "GelSight Mini"
+# Pixel Per Millimeter
+mmpp: 0.0634
+# Image Width and Height
+h: 240
+w: 320
+# Pressing depth in m
+press_depth: 0.001
