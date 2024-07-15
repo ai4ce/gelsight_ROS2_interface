@@ -1,0 +1,9 @@
+# Device Name
+device_name: "GelBelt"
+# Pixel Per Millimeter
+ppmm: 0.133
+# Image Width and Height
+h: 450
+w: 300
+# Pressing depth in m
+press_depth: 0.001

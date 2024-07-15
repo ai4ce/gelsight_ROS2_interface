@@ -1,7 +1,6 @@
 from gelsight_interface_msg.srv import TakePointcloud
 
 from sensor_msgs.msg import Joy
-from sensor_msgs.msg import PointCloud2
 import sensor_msgs_py.point_cloud2 as pc_utils
 
 from queue import Queue
@@ -111,12 +110,12 @@ def main(args=None):
             # send request to server to capture images
             pointcloud_future = client.gs_cli.call_async(client.gs_req)
 
-            # immediately shutter up to debounce, so we don't caputre multiple images
+            # immediately shutter up to debounce, so we don't caputre multiple pointclouds
             client.shutter = False
             
             client.get_logger().info('Request to capture gelsight pointcloud sent...')
             
-            # wait for the server to capture images
+            # wait for the server to capture
             rclpy.spin_until_future_complete(client, pointcloud_future)
 
             # get the images from the server

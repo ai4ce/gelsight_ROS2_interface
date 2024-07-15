@@ -4,14 +4,13 @@ import os
 import re
 import asyncio
 import subprocess
-from threading import Thread, Lock
 
 if os.name == 'nt':
     import winrt.windows.devices.enumeration as windows_devices
 
 VIDEO_DEVICES = 4 # video device is labelled as 4 in windows
 
-def get_camera_id(camera_name) -> int:
+def get_camera_id(camera_name):
     """Find the camera ID that has the corresponding camera name."""
     cam_num = None
     if os.name == 'nt':
@@ -74,90 +73,63 @@ if os.name == 'nt':
     async def get_camera_information_for_windows():
         return await windows_devices.DeviceInformation.find_all_async(VIDEO_DEVICES)
     
+def resize_crop(img, imgw, imgh):
+    """Resize and crop the image to the desired size."""
+    # remove 1/7th of border from each size
+    border_size_x, border_size_y = int(img.shape[0] * (1 / 7)), int(
+        np.floor(img.shape[1] * (1 / 7))
+    )
+    cropped_imgh = img.shape[0] - 2 * border_size_x
+    cropped_imgw = img.shape[1] - 2 * border_size_y
+    # Extra cropping to maintain aspect ratio
+    extra_border_h = 0
+    extra_border_w = 0
+    if cropped_imgh * imgw / imgh > cropped_imgw + 1e-8:
+        extra_border_h = int(cropped_imgh - cropped_imgw * imgh / imgw)
+    elif cropped_imgh * imgw / imgh < cropped_imgw - 1e-8:
+        extra_border_w = int(cropped_imgw - cropped_imgh * imgw / imgh)
+    # keep the ratio the same as the original image size
+    img = img[
+        border_size_x + extra_border_h : img.shape[0] - border_size_x,
+        border_size_y + extra_border_w : img.shape[1] - border_size_y,
+    ]
+    # final resize for 3d
+    img = cv2.resize(img, (imgw, imgh))
+    return img
 
 
 
-
-class Camera2D:
-    """The GelSight Camera Class. A mult-threaded wrapper around the cv2.VideoCapture"""
+class Camera:
+    """The GelSight Camera Class."""
     def __init__(self, dev_type, imgh, imgw):
+        # variable to store data
+        self.data = None
         self.name = dev_type
         self.dev_id = get_camera_id(dev_type)
         self.imgh = imgh
         self.imgw = imgw
-        
-        self.started = False
-        self.read_lock = Lock()
+        self.cam = None
+        self.while_condition = 1
 
+    def connect(self):
         """Connect to the camera using cv2 streamer."""
-        self.stream = cv2.VideoCapture(self.dev_id)
-        self.stream.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-        if self.stream is None or not self.stream.isOpened():
+        self.cam = cv2.VideoCapture(self.dev_id)
+        self.cam.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        if self.cam is None or not self.cam.isOpened():
             print("Warning: unable to open video source: ", self.dev_id)
-        (self.grabbed, self.frame) = self.stream.read()
 
-    def start(self):
-        if self.started:
-            print("already started!!")
-            return None
-        self.started = True
-        self.thread = Thread(target=self.update, args=())
-        self.thread.start()
-        return self
-    
-    def update(self):
-        while self.started:
-            (grabbed, frame) = self.stream.read()
-            self.read_lock.acquire()
-            self.grabbed, self.frame = grabbed, frame
-            self.read_lock.release()
+        return self.cam
 
-    def read(self):
-        self.read_lock.acquire()
-        frame = self.get_resize_crop(self.frame.copy())
-        self.read_lock.release()
-        return frame
-
-    def stop(self):
-        self.started = False
-        self.thread.join()
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.stream.release()
-
-    def get_resize_crop(self, img):
-        """Resize and crop the image to the desired size."""
-        # remove 1/7th of border from each size
-        border_size_x, border_size_y = int(img.shape[0] * (1 / 7)), int(
-            np.floor(img.shape[1] * (1 / 7))
-        )
-        cropped_imgh = img.shape[0] - 2 * border_size_x
-        cropped_imgw = img.shape[1] - 2 * border_size_y
-        # Extra cropping to maintain aspect ratio
-        extra_border_h = 0
-        extra_border_w = 0
-        if cropped_imgh * self.imgw / self.imgh > cropped_imgw + 1e-8:
-            extra_border_h = int(cropped_imgh - cropped_imgw * self.imgh / self.imgw)
-        elif cropped_imgh * self.imgw / self.imgh < cropped_imgw - 1e-8:
-            extra_border_w = int(cropped_imgw - cropped_imgh * self.imgw / self.imgh)
-        # keep the ratio the same as the original image size
-        img = img[
-            border_size_x + extra_border_h : img.shape[0] - border_size_x,
-            border_size_y + extra_border_w : img.shape[1] - border_size_y,
-        ]
-        # final resize for 3d
-        img = cv2.resize(img, (self.imgw, self.imgh))
-        return img
-    # def get_image(self, flush=False):
-    #     """Get the image from the camera."""
-    #     if flush:
-    #         # flush out fist few frames to remove black frames
-    #         for i in range(10):
-    #             ret, f0 = self.cam.read()
-    #     ret, f0 = self.cam.read()
-    #     if ret:
-    #         f0 = resize_crop(f0, self.imgw, self.imgh)
-    #     else:
-    #         print("ERROR! reading image from camera!")
-    #     self.data = f0
-    #     return self.data
+    def get_image(self, flush=False):
+        """Get the image from the camera."""
+        if flush:
+            # flush out fist few frames to remove black frames
+            for i in range(10):
+                ret, f0 = self.cam.read()
+        ret, f0 = self.cam.read()
+        if ret:
+            f0 = resize_crop(f0, self.imgw, self.imgh)
+        else:
+            print("ERROR! reading image from camera!")
+        self.data = f0
+        return self.data

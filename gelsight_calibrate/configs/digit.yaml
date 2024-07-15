@@ -1,0 +1,9 @@
+# Device Name
+device_name: "DIGIT"
+# Pixel Per Millimeter
+ppmm: 0.0405
+# Image Width and Height
+h: 240
+w: 320
+# Pressing depth in m
+press_depth: 0.001

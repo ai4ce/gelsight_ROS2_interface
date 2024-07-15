@@ -17,6 +17,8 @@ class GelsightImageServer(Node):
     def __init__(self):
         super().__init__('gelsight_image_client') # type: ignore
         
+        ############################ Launch Parameters ########################################
+
         # it's complicated why we need to load the config path instead of the content of config. See launch file for explanation
         self.declare_parameter(name = 'config_path', value = '')
         config_path = self.get_parameter('config_path').get_parameter_value().string_value
@@ -25,6 +27,7 @@ class GelsightImageServer(Node):
             self.imgh = config["h"]
             self.imgw = config["w"]
 
+        ############################ Miscanellous Setup #######################################
         multithread_group = ReentrantCallbackGroup()
         self.cvbridge = CvBridge() # for converting ROS images to OpenCV images
         
@@ -34,11 +37,11 @@ class GelsightImageServer(Node):
                                  imgw=self.imgw)
         self.camera2d.start()
 
-        
+        ############################ Publisher Setup ###########################################
         # image publisher
         self.image_publisher = self.create_publisher(
             msg_type=Image, 
-            topic='/gelsight/image', 
+            topic='/gelsight_capture/image', 
             qos_profile=10)
         image_timer_period = 0.05  # in seconds. equal to 20 Hz
         self.image_timer = self.create_timer(
