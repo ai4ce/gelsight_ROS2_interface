@@ -30,8 +30,8 @@ setup(
         'console_scripts': [
             'gelsight_image_server = gelsight_capture.gelsight_image_server:main',
             'gelsight_pointcloud_server = gelsight_capture.gelsight_pointcloud_server:main',
-            'gelsight_client = gelsight_capture.gelsight_client:main'
-            #'gelsight_client = gelsight_capture.gelsight_client:main'
+            'gelsight_client = gelsight_capture.gelsight_client:main',
+            'gelsight_static_tf_publisher = gelsight_capture.gelsight_static_tf_publisher:main'
         ],
     },
 )

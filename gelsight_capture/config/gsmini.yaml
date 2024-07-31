@@ -7,3 +7,9 @@ h: 240
 w: 320
 # Pressing depth in m
 press_depth: 0.001
+
+# length of 3D printed mount in milimeter
+mount_length: 56
+# length of gelsight sensor itself ex. gel
+gs_length: 24.25
+gel_thickness: 4
