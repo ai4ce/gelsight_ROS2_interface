@@ -25,6 +25,7 @@ def declare_arguments():
             DeclareLaunchArgument("save_folder", default_value="/home/irving/Desktop", description="What folder to save the images to"),
             DeclareLaunchArgument("config_name", default_value="gsmini", description="Name of the configuration file"),
             DeclareLaunchArgument('final_config_path', default_value=[get_package_share_directory("gelsight_capture"), '/config/', LaunchConfiguration('config_name'), '.yaml'])
+            DeclareLaunchArgument("json_path", default_value="/home/irving/Desktop/gelsight_transform.json", description="Path to the logging json file. If empty, no logging will be done"),
         ]
     )
 
@@ -47,6 +48,7 @@ def generate_launch_description():
     final_config_path = LaunchConfiguration("final_config_path")
     gelsight_resource_path = os.path.join(get_package_share_directory("gelsight_capture"), "gelsight_resources")
     save_folder_path = LaunchConfiguration("save_folder")
+    json_path = LaunchConfiguration("json_path")
 
     ld = LaunchDescription()
     ld.add_entity(declare_arguments())
@@ -85,7 +87,8 @@ def generate_launch_description():
         package='gelsight_capture',
         executable='gelsight_client',
         name='gelsight_client',
-        parameters=[{'save_folder': save_folder_path}],
+        parameters=[{'save_folder': save_folder_path,
+                     'json_path': json_path}],
     )
 
     tf_publisher_launch = Node(
