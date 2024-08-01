@@ -24,7 +24,7 @@ def declare_arguments():
         [
             DeclareLaunchArgument("save_folder", default_value="/home/irving/Desktop", description="What folder to save the images to"),
             DeclareLaunchArgument("config_name", default_value="gsmini", description="Name of the configuration file"),
-            DeclareLaunchArgument('final_config_path', default_value=[get_package_share_directory("gelsight_capture"), '/config/', LaunchConfiguration('config_name'), '.yaml'])
+            DeclareLaunchArgument('final_config_path', default_value=[get_package_share_directory("gelsight_capture"), '/config/', LaunchConfiguration('config_name'), '.yaml']),
             DeclareLaunchArgument("json_path", default_value="/home/irving/Desktop/gelsight_transform.json", description="Path to the logging json file. If empty, no logging will be done"),
         ]
     )
