@@ -22,10 +22,10 @@ from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 def declare_arguments():
     return LaunchDescription(
         [
-            DeclareLaunchArgument("save_folder", default_value="/home/irving/Desktop", description="What folder to save the images to"),
+            DeclareLaunchArgument("save_folder", default_value="/home/zf540/Desktop/save_folder/", description="What folder to save the images to"),
             DeclareLaunchArgument("config_name", default_value="gsmini", description="Name of the configuration file"),
             DeclareLaunchArgument('final_config_path', default_value=[get_package_share_directory("gelsight_capture"), '/config/', LaunchConfiguration('config_name'), '.yaml']),
-            DeclareLaunchArgument("json_path", default_value="/home/irving/Desktop/gelsight_transform.json", description="Path to the logging json file. If empty, no logging will be done"),
+            DeclareLaunchArgument("json_path", default_value="/home/zf540/Desktop/save_folder//gelsight_transform.json", description="Path to the logging json file. If empty, no logging will be done"),
         ]
     )
 
@@ -99,9 +99,9 @@ def generate_launch_description():
     )
     ld.add_action(foxglove_launch)
     # ld.add_action(joy_launch)
-    # ld.add_action(image_server_launch)
-    # ld.add_action(pointcloud_server_launch)
-    # ld.add_action(gelsight_client_launch)
+    ld.add_action(image_server_launch)
+    ld.add_action(pointcloud_server_launch)
+    ld.add_action(gelsight_client_launch)
     ld.add_action(tf_publisher_launch)
 
     return ld

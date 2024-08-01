@@ -56,7 +56,7 @@ class GelsightClient(Node):
         # gelsight client
         self.gs_cli = self.create_client(
             srv_type=TakePointcloud, 
-            srv_name='/gelsight/get_pointcloud')
+            srv_name='/gelsight_capture/get_pointcloud')
         while not self.gs_cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('RGB service not available, waiting again...')
         
