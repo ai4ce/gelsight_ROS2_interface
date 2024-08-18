@@ -60,19 +60,19 @@ class GelsightPointcloudServer(Node):
         # pointcloud publisher
         self.pointcloud_publisher = self.create_publisher(
             msg_type=PointCloud2, 
-            topic='/gelsight/pointcloud', 
+            topic='/gelsight_capture/pointcloud', 
             qos_profile=10)
         
         self.image_subscriber = self.create_subscription(
             msg_type=Image, 
-            topic='/gelsight/image', 
+            topic='/gelsight_capture/image', 
             callback=self.image_sub_callback,
             qos_profile=10,
             callback_group=multithread_group)
         
         self.pointcloud_service = self.create_service(
             srv_type=TakePointcloud, 
-            srv_name='/gelsight/get_pointcloud', 
+            srv_name='/gelsight_capture/get_pointcloud', 
             callback=self.get_pointcloud_callback,
             callback_group=multithread_group)
         # pointcloud_timer_period = 0.05  # in seconds. equal to 20 Hz
