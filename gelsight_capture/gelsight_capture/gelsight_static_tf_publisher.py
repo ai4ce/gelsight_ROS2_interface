@@ -5,7 +5,12 @@ from geometry_msgs.msg import TransformStamped
 import rclpy
 from rclpy.node import Node
 
+from rclpy.time import Time
+from rclpy.duration import Duration
+
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
 
 class GelSightStaticTFPublisher(Node):
     """
@@ -28,15 +33,37 @@ class GelSightStaticTFPublisher(Node):
 
         self.tf_static_broadcaster = StaticTransformBroadcaster(self)
 
+        ############################# TF Setup ###############################################
+        self.link_name = 'link_gelsight'
         # Publish static transforms once at startup
         self.make_transforms()
+
+        # buffer to hold the transform in a cache
+        self.tf_buffer = Buffer()
+
+        # listener. Important to spin a thread, otherwise the listen will block and no TF can be updated
+        self.tf_listener = TransformListener(buffer=self.tf_buffer, node=self, spin_thread=True)
+
+        self.pose_publisher = self.create_publisher(
+        msg_type=TransformStamped, 
+        topic='/gelsight_capture/gelsight_pose', 
+        qos_profile=10)
+
+        self.create_timer(0.5, self.publish_pose)
+    
+    def publish_pose(self):
+        try:
+            t = self.tf_buffer.lookup_transform('link_base', self.link_name, Time(), timeout=Duration(seconds=2))
+            self.pose_publisher.publish(t)
+        except Exception as e:
+            self.get_logger().info(f"Failed to publish pose: {e}")
 
     def make_transforms(self):
         t = TransformStamped()
 
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = 'link_eef'
-        t.child_frame_id = 'link_gelsight'
+        t.child_frame_id = self.link_name
 
         # calculate the x distance between the end effector and the gelsight in meters
         z_distance = (self.mount_length + self.gs_length + self.gel_thickness) / 1000
