@@ -1,0 +1,7 @@
+---
+sensor_msgs/PointCloud2 patch
+sensor_msgs/PointCloud2 mask
+sensor_msgs/Image image
+std_msgs/Float32MultiArray normal
+
+

@@ -1,4 +1,7 @@
-from gelsight_interface_msg.srv import TakePointcloud
+from gelsight_interface_msg.srv import GSCapture
+
+import cv2
+from cv_bridge import CvBridge
 
 from sensor_msgs.msg import Joy
 import sensor_msgs_py.point_cloud2 as pc_utils
@@ -34,12 +37,14 @@ class GelsightClient(Node):
         self._debounce_setup() # for debouncing the capture button
         self.shutter = False # when this is true, the client will issue a request to the server to capture pointcloud
 
-        # create a folder to save the images
-        self.pc_save_folder = os.path.join(self.save_folder, 'pointcloud')
-        os.makedirs(self.pc_save_folder, exist_ok=True)
+        # create a folder to save the tactile info
+        # save_folder/tactile/patch + save_folder/tactile/mask + save_folder/tactile/image + save_folder/tactile/normal
+        if self.save_folder != '':
+            self._folder_init()
 
         self.pointcloud_count = 0
 
+        self.cvbridge = CvBridge()
         ############################ JSON Setup ###############################################
         if self.json_path != '':
             self.json_dict = {}
@@ -55,12 +60,12 @@ class GelsightClient(Node):
         ############################ Client Setup #############################################
         # gelsight client
         self.gs_cli = self.create_client(
-            srv_type=TakePointcloud, 
-            srv_name='/gelsight_capture/get_pointcloud')
+            srv_type=GSCapture, 
+            srv_name='/gelsight_capture/capture')
         while not self.gs_cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('RGB service not available, waiting again...')
         
-        self.gs_req = TakePointcloud.Request()
+        self.gs_req = GSCapture.Request()
 
         ############################ Subscriber Setup #########################################
         # subscribe to joy topic to read joystick button press
@@ -77,40 +82,27 @@ class GelsightClient(Node):
         if old_value == 0 and msg.buttons[9] == 1: 
             self.shutter = True # rising edge detected
 
-    def postprocess(self, ros_cloud):
+    def postprocess(self, response):
         '''
-        ros_cloud: sensor_msgs.msg.PointCloud2
+        response: gelsight_interface_msg.srv.GSCapture.Response
         Convert a PointCloud2 message to a pcd and save it to disk
         '''
         
-        # Get cloud data from ros_cloud
-        field_names=[field.name for field in ros_cloud.fields]
-        cloud_data = list(pc_utils.read_points(ros_cloud, skip_nans=True, field_names = field_names))
-        
-        # Check empty
-        open3d_cloud = o3d.geometry.PointCloud()
-        if len(cloud_data)==0:
-            self.get_logger().warn('Empty pointcloud, not saving.')
-            return
-        
-        # populate the open3d cloud
-        xyz = [(x,y,z) for x,y,z in cloud_data ] # get xyz
-        open3d_cloud.points = o3d.utility.Vector3dVector(np.array(xyz))
+        patch_cloud = self._roscloud2o3d(response.patch)
+        mask_cloud = self._roscloud2o3d(response.mask)
+        image = self.cvbridge.imgmsg_to_cv2(response.image, desired_encoding='passthrough')
+        normal = self._rosarray2np(response.normal)
 
         # color the log message in yellow
         color_start = '\033[93m'
         color_reset = '\033[0m'
 
         if self.save_folder != '':
-            # save the pointcloud
-            o3d.io.write_point_cloud(
-                os.path.join(self.pc_save_folder, f'{self.pointcloud_count}.pcd'),
-                open3d_cloud
-            )
+            self._save_data(patch_cloud, mask_cloud, image, normal)
 
-            self.get_logger().info(f'{color_start}Pointcloud saved.{color_reset}')
+            self.get_logger().info(f'{color_start}Data saved.{color_reset}')
         else:
-            self.get_logger().info(f'{color_start}Pointcloud captured, not saved{color_reset}')
+            self.get_logger().info(f'{color_start}Data captured, not saved{color_reset}')
         
         # update the json dict
         if self.json_path != '':
@@ -177,7 +169,11 @@ class GelsightClient(Node):
         transformation_matrix = self._process_tf(transformstamp)
 
 
-        update_dict['file_path'] = os.path.join('pointcloud', f'{self.pointcloud_count}.pcd')
+        update_dict['patch_path'] = os.path.join('tactile/patch', f'{self.pointcloud_count}.pcd')
+        update_dict['mask_path'] = os.path.join('tactile/mask', f'{self.pointcloud_count}.pcd')
+        update_dict['image_path'] = os.path.join('tactile/image', f'{self.pointcloud_count}.png')
+        update_dict['normal_path'] = os.path.join('tactile/normal', f'{self.pointcloud_count}.npy')
+
         update_dict['transformation_matrix'] = transformation_matrix.tolist()
         update_dict['colmap_im_id'] = self.pointcloud_count
 
@@ -204,6 +200,61 @@ class GelsightClient(Node):
 
         return transformation_matrix
     
+    def _roscloud2o3d(self, ros_cloud):
+        '''
+        Convert a PointCloud2 message to a pcd
+        '''
+        
+        # Get cloud data from ros_cloud
+        field_names=[field.name for field in ros_cloud.fields]
+        cloud_data = list(pc_utils.read_points(ros_cloud, skip_nans=True, field_names = field_names))
+        
+        # Check empty
+        open3d_cloud = o3d.geometry.PointCloud()
+        if len(cloud_data)==0:
+            self.get_logger().warn('Empty pointcloud, not saving.')
+            return
+        
+        # populate the open3d cloud
+        xyz = [(x,y,z) for x,y,z in cloud_data ] # get xyz
+        open3d_cloud.points = o3d.utility.Vector3dVector(np.array(xyz))
+
+        return open3d_cloud
+    
+    def _rosarray2np(self, ros_array):
+        '''
+        Convert a Float32MultiArray message to a numpy array
+        '''
+        return np.array(ros_array.data).reshape(ros_array.layout.dim[0].size, ros_array.layout.dim[1].size, ros_array.layout.dim[2].size)
+    
+    def _save_data(self, patch, mask, image, normal):
+        '''
+        Save the patch, mask, image, and normal to disk
+        '''
+        o3d.io.write_point_cloud(
+            os.path.join(self.patch_save_folder, f'patch_{self.pointcloud_count}.pcd'),
+            patch
+        )
+        o3d.io.write_point_cloud(
+            os.path.join(self.mask_save_folder, f'mask_{self.pointcloud_count}.pcd'),
+            mask
+        )
+        cv2.imwrite(os.path.join(self.image_save_folder, f'image_{self.pointcloud_count}.png'), image)
+        np.save(os.path.join(self.normal_save_folder, f'normal_{self.pointcloud_count}.npy'), normal)
+
+    def _folder_init(self):
+        os.makedirs(self.save_folder, exist_ok=True)
+        self.save_folder = os.path.join(self.save_folder, 'tactile')
+        os.makedirs(self.save_folder, exist_ok=True)
+        self.patch_save_folder = os.path.join(self.save_folder, 'patch')
+        os.makedirs(self.patch_save_folder, exist_ok=True)
+        self.mask_save_folder = os.path.join(self.save_folder, 'mask')
+        os.makedirs(self.mask_save_folder, exist_ok=True)
+        self.image_save_folder = os.path.join(self.save_folder, 'image')
+        os.makedirs(self.image_save_folder, exist_ok=True)
+        self.normal_save_folder = os.path.join(self.save_folder, 'normal')
+        os.makedirs(self.normal_save_folder, exist_ok=True)
+
 def main(args=None):
     rclpy.init(args=args)
 
@@ -227,7 +278,7 @@ def main(args=None):
             pointcloud_response = pointcloud_future.result()
 
             # postprocess the images
-            client.postprocess(pointcloud_response.pointcloud)
+            client.postprocess(pointcloud_response)
 
         rclpy.spin_once(client)
 
