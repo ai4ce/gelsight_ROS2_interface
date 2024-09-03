@@ -1,6 +1,6 @@
 # Device Name
 device_name: "GelSight Mini"
-# Pixel Per Millimeter
+# actually millimeter per pixel.
 ppmm: 0.0634
 # Image Width and Height
 h: 240
