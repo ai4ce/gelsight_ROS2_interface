@@ -30,6 +30,8 @@ class GelSightStaticTFPublisher(Node):
             self.mount_length = config['mount_length']
             self.gs_length = config['gs_length']
             self.gel_thickness = config['gel_thickness']
+            self.x_offset = config['x_offset']
+            self.y_offset = config['y_offset']
 
         self.tf_static_broadcaster = StaticTransformBroadcaster(self)
 
@@ -65,17 +67,15 @@ class GelSightStaticTFPublisher(Node):
         t.header.frame_id = 'link_eef'
         t.child_frame_id = self.link_name
 
-        # calculate the x distance between the end effector and the gelsight in meters
+        # calculate the distance between the end effector and the gelsight in meters
+        x_distance = self.x_offset / 1000
+        y_distance = self.y_offset / 1000
         z_distance = (self.mount_length + self.gs_length + self.gel_thickness) / 1000
 
-        t.transform.translation.x = float(0)
-        t.transform.translation.y = float(0)
+        t.transform.translation.x = float(x_distance)
+        t.transform.translation.y = float(y_distance)
         t.transform.translation.z = float(z_distance)
 
-        # R is a 3x3 identity rotation matrix
-        # R = np.eye(3)
-        # quat = mat2quat(R)
-        # self.get_logger().info(f"quat: {quat}")
         t.transform.rotation.x = 0.0
         t.transform.rotation.y = 0.0
         t.transform.rotation.z = 0.0

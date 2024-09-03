@@ -13,3 +13,7 @@ mount_length: 56
 # length of gelsight sensor itself ex. gel
 gs_length: 24.25
 gel_thickness: 4
+
+# the sensor's center is not exactly the centor of the mount
+x_offset: -0.25
+y_offset: 0.5
