@@ -236,9 +236,19 @@ class GelsightClient(Node):
             patch
         )
         o3d.io.write_point_cloud(
+            os.path.join(self.patch_save_folder, f'patch_{self.pointcloud_count}.ply'),
+            patch
+        )
+        
+        o3d.io.write_point_cloud(
             os.path.join(self.mask_save_folder, f'mask_{self.pointcloud_count}.pcd'),
             mask
         )
+        o3d.io.write_point_cloud(
+            os.path.join(self.mask_save_folder, f'mask_{self.pointcloud_count}.ply'),
+            mask
+        )
+
         cv2.imwrite(os.path.join(self.image_save_folder, f'image_{self.pointcloud_count}.png'), image)
         np.save(os.path.join(self.normal_save_folder, f'normal_{self.pointcloud_count}.npy'), normal)
 
