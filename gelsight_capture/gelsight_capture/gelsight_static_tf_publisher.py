@@ -68,7 +68,7 @@ class GelSightStaticTFPublisher(Node):
         t.child_frame_id = self.link_name
 
         # calculate the distance between the end effector and the gelsight in meters
-        x_distance = self.x_offset / 1000
+        x_distance = -self.x_offset / 1000 # x direcction is on the negative side
         y_distance = self.y_offset / 1000
         z_distance = (self.mount_length + self.gs_length + self.gel_thickness) / 1000
 
