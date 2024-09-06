@@ -8,7 +8,7 @@ w: 320
 # Pressing depth in m
 press_depth: 0.001
 
-# All the number below are in the coordinate of the EEF.
+# All the number has no concern in terms of axis
 # length of 3D printed mount in milimeter
 mount_length: 75
 # length of gelsight sensor itself ex. gel
@@ -17,4 +17,4 @@ gel_thickness: 4
 
 # the sensor's center is not exactly the centor of the mount
 x_offset: 0.25
-y_offset: 0.42
+y_offset: 0.5
