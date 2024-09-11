@@ -169,10 +169,10 @@ class GelsightClient(Node):
         transformation_matrix = self._process_tf(transformstamp)
 
 
-        update_dict['patch_path'] = os.path.join('tactile/patch', f'{self.pointcloud_count}.pcd')
-        update_dict['mask_path'] = os.path.join('tactile/mask', f'{self.pointcloud_count}.pcd')
-        update_dict['image_path'] = os.path.join('tactile/image', f'{self.pointcloud_count}.png')
-        update_dict['normal_path'] = os.path.join('tactile/normal', f'{self.pointcloud_count}.npy')
+        update_dict['patch_path'] = os.path.join('tactile/patch', f'patch_{self.pointcloud_count}.pcd')
+        update_dict['mask_path'] = os.path.join('tactile/mask', f'mask_{self.pointcloud_count}.pcd')
+        update_dict['image_path'] = os.path.join('tactile/image', f'image_{self.pointcloud_count}.png')
+        update_dict['normal_path'] = os.path.join('tactile/normal', f'normal_{self.pointcloud_count}.npy')
 
         update_dict['transform_matrix'] = transformation_matrix.tolist()
         update_dict['colmap_im_id'] = self.pointcloud_count
