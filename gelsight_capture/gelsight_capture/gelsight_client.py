@@ -174,7 +174,7 @@ class GelsightClient(Node):
         update_dict['image_path'] = os.path.join('tactile/image', f'{self.pointcloud_count}.png')
         update_dict['normal_path'] = os.path.join('tactile/normal', f'{self.pointcloud_count}.npy')
 
-        update_dict['transformation_matrix'] = transformation_matrix.tolist()
+        update_dict['transform_matrix'] = transformation_matrix.tolist()
         update_dict['colmap_im_id'] = self.pointcloud_count
 
         self.json_dict['frames'].append(update_dict)
