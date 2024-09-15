@@ -1,0 +1,32 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/zf540/tactile_recon_ws/install/xarm_planner/include/**",
+        "/home/zf540/tactile_recon_ws/install/xarm_gazebo/include/**",
+        "/home/zf540/tactile_recon_ws/install/xarm_controller/include/**",
+        "/home/zf540/tactile_recon_ws/install/xarm_api/include/**",
+        "/home/zf540/tactile_recon_ws/install/xarm_msgs/include/**",
+        "/home/zf540/tactile_recon_ws/install/realsense_interface_msg/include/**",
+        "/home/zf540/tactile_recon_ws/install/gelsight_interface_msg/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/zf540/tactile_recon_ws/src/xarm_ros2/xarm_api/include/**",
+        "/home/zf540/tactile_recon_ws/src/xarm_ros2/xarm_controller/include/**",
+        "/home/zf540/tactile_recon_ws/src/xarm_ros2/xarm_gazebo/include/**",
+        "/home/zf540/tactile_recon_ws/src/xarm_ros2/xarm_moveit_servo/include/**",
+        "/home/zf540/tactile_recon_ws/src/xarm_ros2/xarm_planner/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

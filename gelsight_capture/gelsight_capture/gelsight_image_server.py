@@ -42,7 +42,7 @@ class GelsightImageServer(Node):
             msg_type=Image, 
             topic='/gelsight_capture/image', 
             qos_profile=10)
-        image_timer_period = 0.067  # in seconds. roughly 15 Hz
+        image_timer_period = 0.05  # in seconds. roughly 15 Hz
         self.image_timer = self.create_timer(
             timer_period_sec=image_timer_period, 
             callback=self.image_timer_callback,

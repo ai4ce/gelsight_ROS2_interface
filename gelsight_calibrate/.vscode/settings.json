@@ -1,0 +1,30 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/zf540/tactile_recon_ws/install/xarm_planner/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/xarm_msgs/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/uf_ros_lib/lib/python3.10/site-packages",
+        "/home/zf540/tactile_recon_ws/install/realsense_interface_msg/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/realsense_capture/lib/python3.10/site-packages",
+        "/home/zf540/tactile_recon_ws/install/pymoveit2/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/joy_hand_eye/lib/python3.10/site-packages",
+        "/home/zf540/tactile_recon_ws/install/gelsight_interface_msg/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/gelsight_capture/lib/python3.10/site-packages",
+        "/home/zf540/tactile_recon_ws/install/fusion_sense/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/zf540/tactile_recon_ws/install/xarm_planner/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/xarm_msgs/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/uf_ros_lib/lib/python3.10/site-packages",
+        "/home/zf540/tactile_recon_ws/install/realsense_interface_msg/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/realsense_capture/lib/python3.10/site-packages",
+        "/home/zf540/tactile_recon_ws/install/pymoveit2/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/joy_hand_eye/lib/python3.10/site-packages",
+        "/home/zf540/tactile_recon_ws/install/gelsight_interface_msg/local/lib/python3.10/dist-packages",
+        "/home/zf540/tactile_recon_ws/install/gelsight_capture/lib/python3.10/site-packages",
+        "/home/zf540/tactile_recon_ws/install/fusion_sense/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}
